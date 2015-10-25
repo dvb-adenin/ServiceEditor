@@ -1,3 +1,5 @@
+from Tools.Directories import resolveFilename, SCOPE_CONFIG
+from . import *
 import thread
 class Lamedb:
 	def __init__(self):
@@ -8,16 +10,19 @@ class Lamedb:
 #		self._initDatabase(None,)
 		
 	def _initDatabase(self,dummy):
+		print_gr ("Lamedb._initDatabase started")
 		self.database.clear()
 		self.databaseState=0
-		print "phase1"
+		print_gr ("phase1: translateTransponders")
 		self.translateTransponders(self.getTransponders(self.readLamedb()))
-		print "phase2"
+		print_gr ("phase2:t ranslateServices")
 		self.translateServices(self.getServices(self.readLamedb()))
-		print "phase3"
+		print_gr ("Lamedb._initDatabase finished")
 
 	def readLamedb(self):
-		f = file("/etc/enigma2/lamedb","r")
+
+		f = file((resolveFilename(SCOPE_CONFIG) + "/lamedb"),"r")
+#		f = file("/etc/enigma2/lamedb","r")
 		lamedb = f.readlines()
 		f.close()
 		if lamedb[0].find("/3/") != -1:
@@ -25,14 +30,14 @@ class Lamedb:
 		elif lamedb[0].find("/4/") != -1:
 			self.version = 4
 		else:
-			print "unbekante Version: ",lamedb[0]
+			print_rd ("unknown leame version: ",lamedb[0])
 			return
-		print "import version %d" % self.version
+		print_gr ("import lamedb version %d" % self.version)
 		return lamedb
 
 	def writeLamedb(self,version = 4):
 		if version <> 4:
-			print "only version 4 yet"
+			print_ye ("only version 4 yet")
 			return
 		puffer = []
 		puffer.append("eDVB services /4/\n")
@@ -76,37 +81,74 @@ class Lamedb:
 		f = file("/etc/enigma2/lamedb","w")
 		f.writelines(puffer)
 		f.close()
+
+	def writeM3U(self):
+		puffer = []
+		puffer.append("#EXTM3U\n")
+		for tp in self.database:
+			for service in self.database[tp]["services"]:
+				service = self.database[tp]["services"][service]
+				puffer.append("#EXTINF:-1,%s\n" % service["name"].replace(' ','_'))
+	#FIXME src soll irgendwie DiSEqC-CMD sein ???
+	#FIXME polarisation ist hier noch als Zahlenwert, das muss aber v oder h sein
+	#FIXME Frequenz auf MHz gerundet
+	#FIXME Sysmbolrate auf kHz gerundet
+				puffer.append("http://<?=StatusIP?>?src=%s&freq=%s&sr=%s&pol=%s" %(1, tp["frequency"], tp["symbol_rate"], tp["polarization"]) )
+
+		f = file("/tmp/astra_all_services.m3u","w")
+		f.writelines(puffer)
+		f.close()
 		
 	def getServices(self, lamedb):
-		print "getServices",
-		if lamedb is None:
-			return
+		print_gr ("Lamedb.getServices started")
+		services = []
 		collect = False
 		state = 0
-		services = []
-		for x in xrange(len(lamedb)-2):
-			if lamedb[x] == "services\n":
-				collect = True
-				continue
-			if lamedb[x] == "end\n":
-				collect = False
-				continue
-			if collect:
-				tmp = lamedb[x].split(":")
-				if len(tmp) >= 4:
-					if tmp[1]+tmp[2]+tmp[3] in self.database:
-						tmp = lamedb[x+2].split(",")
-						for key in tmp:
-							key = key.split(":")
-#							if len(key)==2 and key[0].strip() in ("c","C","f","p",):
-							if len(key)==2:
-								continue
-							else:
-								break
+		lamdb_len = len(lamedb)
+		skip_processed_lines = 0
+		if lamedb is not  None:
+			for x in xrange(lamdb_len - 2):
+				if lamedb[x] == "services\n":
+					collect = True
+					continue
+				if lamedb[x] == "end\n":
+					collect = False
+					continue
+				if collect:
+					if skip_processed_lines:
+						skip_processed_lines -= 1
+						continue
+					if  lamedb[x].find(",") == -1 and lamedb[x].find(":") != -1:
+						tmp = lamedb[x].split(":")
+						if len(tmp) >= 4:
+#							print_cy("ok --> %s" %lamedb[x]) # #adenin_debug
+							if tmp[1]+tmp[2]+tmp[3] in self.database:
+								tmp = lamedb[x+2].split(",")
+								for key in tmp:
+									key = key.split(":")
+#									if len(key)==2 and key[0].strip() in ("c","C","f","p",):
+									if len(key)==2:
+										continue
+									else:
+										print_ye ("key count != 2 => %s %s" %(lamedb[x], key))
+										break
+								else:
+									services.append((lamedb[x],lamedb[x+1],lamedb[x+2],))
+									skip_processed_lines = 2
+#									self.translateService((lamedb[x],lamedb[x+1],lamedb[x+2],))
 						else:
-							services.append((lamedb[x],lamedb[x+1],lamedb[x+2],))
-#							self.translateService((lamedb[x],lamedb[x+1],lamedb[x+2],))
-		print " fertig"
+							print_rd("we excepte last four colon separeted parts --> %s" %lamedb[x])
+							pass
+					else:
+						print_rd ("unknown format (maybe?)--> %s" %lamedb[x])
+						pass
+				else:
+#					print_ye("Stuff that is not in the service section --> %s" %lamedb[x])
+					pass
+		else:
+			print_ye ("lamedb ist empty, no services found")
+			pass
+		print_gr ("Lamedb.getServices finished")
 		return services
 	
 	
@@ -115,34 +157,37 @@ class Lamedb:
 		if serviceData is None:
 			return
 		service = {}
-		tp_data = serviceData[0].strip().split(":")
+		service_update = service.update
+		service_get = service.get
+		tp_data = serviceData[0].strip().lower().split(":")
 		if len(tp_data) > len(t1):
 			print "falsche Anzahl Parameter (6 erwartet) in ",serviceData[0]
 			return
 		for y in xrange(len(t1)):
-			service.update({t1[y]:tp_data[y]})
-		name = serviceData[1].strip().replace('\xc2\x86', '').replace('\xc2\x87', '')
-		service.update({"name":name})
+			service_update({t1[y]:tp_data[y]})
+
+		name = serviceData[1].strip().replace('\xc2\x86', '').replace('\xc2\x87', '').replace('\xc3\x82', '')
+		service_update({"name":name})
 		provider_data = serviceData[2].strip().split(",")
 		for y in provider_data:
 			raw = y.split(":")
 #			if len(raw)==2 and raw[0].strip() in ("c","C","f","p",):
 			if raw[0]=="p":
-				service["provider"] = raw[1].strip().replace('\xc2\x86', '').replace('\xc2\x87', '')
+				service["provider"] = raw[1].strip().replace('\xc2\x86', '').replace('\xc2\x87', '').replace('\xc3\x82', '')
 			elif raw[0]=="c":
-				cacheIDs = service.get("cacheIDs",None)
+				cacheIDs = service_get("cacheIDs",None)
 				if cacheIDs is None:
-					service["cacheIDs"] = [raw[1].strip(),]
+					service["cacheIDs"] = [raw[1].strip().lower(),]
 				else:
-					cacheIDs.append(raw[1].strip())
+					cacheIDs.append(raw[1].strip().lower())
 			elif raw[0]=="C":
-				caIDs = service.get("caIDs",None)
+				caIDs = service_get("caIDs",None)
 				if caIDs is None:
-					service["caIDs"] = [raw[1].strip(),]
+					service["caIDs"] = [raw[1].strip().lower(),]
 				else:
-					caIDs.append(raw[1].strip())
+					caIDs.append(raw[1].strip().lower())
 			elif raw[0]=="f":
-				service["flags"] = raw[1].strip()
+				service["flags"] = raw[1].strip().lower()
 			else:
 				print "unbekanter Parameter:",raw[0]
 				print "in:",y
@@ -151,13 +196,10 @@ class Lamedb:
 #				break
 		else:
 			uniqueTransponder = service["namespace"]+service["tsid"]+service["onid"]
-			if (int(service.get("flags","0"),16) & dxNoDVB):
-				tmp = ''
-				for cacheID in service.get("cacheIDs",[]):
-					tmp += cacheID
-				uniqueService = uniqueTransponder + tmp
-			else:
-				uniqueService = uniqueTransponder + service["sid"]
+			uniqueService = uniqueTransponder + service["sid"]
+			if (int(service_get("flags","0"),16) & dxNoDVB):
+				for cacheID in service_get("cacheIDs",[]):
+					uniqueService += cacheID
 			service["usk"] = uniqueService
 			self.database[uniqueTransponder]["services"][uniqueService] = service
 			self.readcnt += 1
@@ -186,7 +228,7 @@ class Lamedb:
 			if x == "end\n":
 				collect = False
 				continue
-			y = x.strip().split(":")
+			y = x.strip().lower().split(":")
 			if collect:
 				if y[0] == "/":
 					transponders.append(tp)
@@ -251,7 +293,7 @@ class Lamedb:
 				continue
 			tp = {"services":[]}
 			x[1][0] = freq[1]
-			if freq[0] == "s" or freq[0] == "S":
+			if freq[0] == "s":
 				if ((self.version == 3) and len(x[1]) > len(t2_sv3)) or ((self.version == 4) and len(x[1]) > len(t2_sv4)):
 					print "zu viele Parameter (t2) in ",x[1]
 					continue
@@ -271,7 +313,7 @@ class Lamedb:
 				self.database[tp["namespace"]+tp["tsid"]+tp["onid"]] = tp
 				self.database[tp["namespace"]+tp["tsid"]+tp["onid"]]["services"] = {}
 				self.databaseState=1
-			elif freq[0] == "c" or freq[0] == "C":
+			elif freq[0] == "c":
 				if len(x[1]) > len(t2_c):
 					print "zu viele Parameter (t2) in ",x[1]
 					continue
@@ -282,7 +324,7 @@ class Lamedb:
 				self.database[tp["namespace"]+tp["tsid"]+tp["onid"]] = tp
 				self.database[tp["namespace"]+tp["tsid"]+tp["onid"]]["services"] = {}
 				self.databaseState=1
-			elif freq[0] == "t" or freq[0] == "T":
+			elif freq[0] == "t":
 				if len(x[1]) > len(t2_t):
 					print "zu viele Parameter (t2) in ",x[1]
 					continue

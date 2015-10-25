@@ -1,5 +1,5 @@
 <keymap>
-	<map context="ServicesEditorActions">
+	<map context="ServiceEditorActions">
 		<key id="KEY_OK" mapto="select" flags="m" />
 		<key id="KEY_EXIT" mapto="exit" flags="m" />
 		
@@ -16,6 +16,7 @@
 		
 		<key id="KEY_RED" mapto="red" flags="m" />
 		<key id="KEY_RED" mapto="redRepeated" flags="r" />
+		<key id="KEY_RED" mapto="redLong" flags="l" />
 		<key id="KEY_RED" mapto="redUp" flags="b" />
 		<key id="KEY_GREEN" mapto="green" flags="m" />
 		<key id="KEY_GREEN" mapto="greenRepeated" flags="r" />

@@ -1,0 +1,189 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ServiceEditor 20090419\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-04-17 19:22+0200\n"
+"PO-Revision-Date: 2009-04-19 23:45+0200\n"
+"Last-Translator: Zülfikar VEYİSOĞLU <z.veyisoglu@hobiagaci.com>\n"
+"Language-Team: http://www.hobiagaci.com <z.veyisoglu@hobiagaci.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Turkish\n"
+"X-Poedit-Country: TURKEY\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: plugin.py:53
+msgid "E"
+msgstr "D"
+
+#: plugin.py:54
+msgid "W"
+msgstr "B"
+
+#: plugin.py:55
+msgid "DVB-C"
+msgstr "DVB-C"
+
+#: plugin.py:56
+msgid "DVB-T"
+msgstr "DVB-T"
+
+#: plugin.py:122
+msgid "Error"
+msgstr "Hata"
+
+#: plugin.py:231
+msgid "ok"
+msgstr "tamam"
+
+#: plugin.py:268
+msgid "Name"
+msgstr "Ad"
+
+#: plugin.py:269
+#: plugin.py:1075
+msgid "Provider"
+msgstr "Yayıncı"
+
+#: plugin.py:270
+msgid "SID (hex)"
+msgstr "SID (hex)"
+
+#: plugin.py:271
+msgid "PCR PID (hex)"
+msgstr "PCR PID (hex)"
+
+#: plugin.py:272
+msgid "Video PID (hex)"
+msgstr "Video PID (hex)"
+
+#: plugin.py:273
+msgid "Video Type"
+msgstr "Video Tipi"
+
+#: plugin.py:274
+msgid "Audio PID (hex)"
+msgstr "Ses PID (hex)"
+
+#: plugin.py:275
+msgid "AC3 PID (hex)"
+msgstr "AC3 PID (hex)"
+
+#: plugin.py:276
+msgid "Audiochannel"
+msgstr "Ses kanalı"
+
+#: plugin.py:278
+msgid "AC3 Delay (ms)"
+msgstr "AC3 gecikmesi (ms)"
+
+#: plugin.py:279
+msgid "PCM Delay (ms)"
+msgstr "PCM gecikmesi (ms)"
+
+#: plugin.py:281
+msgid "TXT PID (hex)"
+msgstr "Teleteks PID (hex)"
+
+#: plugin.py:282
+msgid "Subtitle PID (hex)"
+msgstr "Altyazı PID (hex)"
+
+#: plugin.py:283
+msgid "dont use SDT"
+msgstr "SDT kullanma!"
+
+#: plugin.py:284
+msgid "hide Service"
+msgstr "Kanalı gizle"
+
+#: plugin.py:285
+msgid "no standart service"
+msgstr "standart kanal değil!"
+
+#: plugin.py:286
+msgid "keep Servicename"
+msgstr "Değişen kanal adını koru "
+
+#: plugin.py:287
+msgid "sign as new Service"
+msgstr "Yeni kanal olarak işaretle"
+
+#: plugin.py:456
+#, python-format
+msgid "unhide Service %s"
+msgstr "%s kanalını göster"
+
+#: plugin.py:458
+#, python-format
+msgid "hide Service %s"
+msgstr "%s kanalını gizle"
+
+#: plugin.py:459
+#, python-format
+msgid "hide Provider %s"
+msgstr "%s yayıncısını gizle"
+
+#: plugin.py:460
+#, python-format
+msgid "unhide Provider %s"
+msgstr "%s yayıncısını göster"
+
+#: plugin.py:461
+#, python-format
+msgid "toggle hide attibutes for %s"
+msgstr "%s kanalını gizle/göster"
+
+#: plugin.py:473
+msgid "Options for hide"
+msgstr "Gizleme seçenekleri"
+
+#: plugin.py:540
+msgid "hide/unhide"
+msgstr "gizle/göster"
+
+#: plugin.py:541
+msgid "edit"
+msgstr "düzenle"
+
+#: plugin.py:543
+msgid "sort"
+msgstr "sırala"
+
+#: plugin.py:559
+msgid "Services"
+msgstr "Kanallar"
+
+#: plugin.py:560
+msgid "Providers"
+msgstr "Yayıncılar"
+
+#: plugin.py:561
+msgid "Pos"
+msgstr "Poz"
+
+#: plugin.py:1065
+msgid "Service"
+msgstr "Kanal"
+
+#: plugin.py:1083
+#: plugin.py:1091
+#: plugin.py:1100
+msgid ""
+"Frequency\n"
+"MHz"
+msgstr ""
+"Frekans\n"
+"MHz"
+
+#: plugin.py:1176
+#: plugin.py:1181
+msgid "Services Editor"
+msgstr "Kanal düzenleyici"
+
