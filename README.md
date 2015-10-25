@@ -2,5 +2,5 @@
 Enigma2 plugin to edit service list
 
 
-todo
+todo  
 -replace ugly icons
