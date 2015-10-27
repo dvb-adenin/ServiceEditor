@@ -32,6 +32,7 @@
 		<key id="KEY_CHANNELDOWN" mapto="prevPageUp" flags="b" />
 		
 		<key id="KEY_HELP" mapto="displayHelp" flags="m" />
+		<key id="KEY_EPG" mapto="displayEPG" flags="m" />
 		<key id="KEY_MENU" mapto="displayMenu" flags="m" />
 		<key id="KEY_INFO" mapto="displayInfo" flags="m" />
 

@@ -24,7 +24,7 @@ from time import strftime, time, localtime, mktime
 from Tools.Directories import resolveFilename, SCOPE_SKIN_IMAGE
 from Tools.LoadPixmap import LoadPixmap
 from os import path
-
+from Tools.BugHunting import *
 
 #from . import _, print_rd, print_gr, print_ye, print_mg, print_cy, print_bl
 from . import *
@@ -159,7 +159,7 @@ class ConfigCall(ConfigBoolean):
 		self.fnc = fnc
 	def handleKey(self, key):
 		if key in [KEY_LEFT, KEY_RIGHT]:
-			print_cy("ConfigCall")
+			print dbgcol.cy,"ConfigCall"
 			if self.fnc is not None:
 				self.fnc()
 
@@ -186,24 +186,25 @@ class ServiceEditor(Screen,ConfigListScreen):
 		<ePixmap pixmap="skin_default/buttons/blue.png" position="577,0" size="140,40" alphatest="on" />
 		<widget name="key_blue" position="420,0" zPosition="1" size="140,40" font="Regular;20" halign="center" valign="center" backgroundColor="#18188b" transparent="1" />
 
-		<widget name="config" position="10,50" size="540,375" scrollbarMode="showOnDemand" />
+		<widget name="config" position="10,50" size="540,475" scrollbarMode="showOnDemand" />
 		</screen>"""
+
 	def __init__(self, session, service = None, database = None):
 		self.skin = ServiceEditor.skin
 		Screen.__init__(self, session)
 		self.service = service
 		self.database = database
 		
-		self.serviceVPid = "0000"
-		self.serviceVType = "0000"
-		self.serviceAPid = "0000"
-		self.serviceTPid = "0000"
-		self.servicePPid = "0000"
-		self.serviceAC3Pid = "0000"
-		self.serviceAChannel = "0000"
-		self.serviceAC3Delay = "0000"
-		self.servicePCMDelay = "0000"
-		self.serviceSubtitle = "0000"
+		self.serviceVPid	= "0000"
+		self.serviceVType	= "0000"
+		self.serviceAPid	= "0000"
+		self.serviceTPid	= "0000"
+		self.servicePPid	= "0000"
+		self.serviceAC3Pid	= "0000"
+		self.serviceAChannel	= "0000"
+		self.serviceAC3Delay	= "0000"
+		self.servicePCMDelay	= "0000"
+		self.serviceSubtitle	= "0000"
 		
 		if self.service is not None:
 			self.serviceName = self.service["name"]
@@ -237,12 +238,13 @@ class ServiceEditor(Screen,ConfigListScreen):
 					elif pidtype == VIDEOTYPE:
 						self.serviceVType = pid
 		else:
-			self.serviceName = "new service"
-			self.serviceProvider = "new provider"
-			self.serviceFlags = "40"
-			self.serviceSid = "0000"
-			self.serviceType = "0"
-			self.serviceVType = "0000"
+			self.serviceName	= "new service"
+			self.serviceProvider	= "new provider"
+			self.serviceFlags	= "40"
+			self.serviceSid		= "0000"
+			self.serviceType	= "0"
+			self.serviceVType	= "0000"
+
 		self.flags = int(self.serviceFlags,16)
 		self.flag_dxNoSDT = (self.flags & dxNoSDT) and True
 		self.flag_dxDontshow = (self.flags & dxDontshow) and True
@@ -257,6 +259,7 @@ class ServiceEditor(Screen,ConfigListScreen):
 				"ok": self.okExit,
 				"green": self.okExit,
 			},-1)
+
 		self["key_red"] = Button("")
 		self["key_green"] = Button(_("ok"))
 		self["key_yellow"] = Button("")
@@ -351,7 +354,7 @@ class ServiceEditor(Screen,ConfigListScreen):
 		self["config"].l.setList(self.list)
 	
 	def transponderEdit(self):
-		print_cy("transponderEdit")
+		print dbgcol.cy,"transponderEdit"
 		self.session.open(SatellitesEditor, self.database)
 		
 	def cancel(self):
@@ -447,7 +450,7 @@ class ServiceEditor(Screen,ConfigListScreen):
 				uniqueService += cacheID
 		tmp["usk"] = uniqueService
 		if tmp["usk"] != self.service["usk"]:
-			print_rd("usk verschieden => neuer Sender!!!")
+			print dbgcol.rd,"usk verschieden => neuer Sender!!!"
 			flags |= dxNewFound
 		else:
 			flags |= tmpFlagdxNoSDT
@@ -591,7 +594,7 @@ class ServiceHideMenuSelection(Screen):
 
 class ServiceListEditor(Screen):
 
-	version = "(20150525-alpha)"
+	version = "(20151027-alpha)"
 	skin = """
 		<screen position="90,95" size="720,576" title="Edit" >
 
@@ -684,8 +687,9 @@ class ServiceListEditor(Screen):
 				"prevPageUp"		: self.selectionKeyUp,
 				"prevPageRepeated"	: self.prevPageRepeated,
 				"displayHelp"		: self.showHelp,
+				"displayEPG"		: self.showHelp,	#KEY_GUIDE changed to KEY_EPG
 				"displayMenu"		: self.openMenu,
-				"displayInfo"		: self.showServiceInfo,
+				"displayInfo"		: self.showInfo,	#for recivers without help-key
 				"select"		: self.editService,
 				"exit"			: self.Exit,
 				"left"			: self.left,
@@ -741,11 +745,11 @@ class ServiceListEditor(Screen):
 		self.database = self.lamedb.database
 		self._initFlag = False
 		self.gpsr = session.nav.getCurrentlyPlayingServiceReference().toString().lower()
-		print_cy(self.gpsr)
+		print dbgcol.cy,self.gpsr
 		tmp = self.gpsr.split(":")
 		if tmp[0]=="1" and tmp[1]=="0" and tmp[10]=="":
 			self.usk = tmp[6].zfill(8)+tmp[4].zfill(4)+tmp[5].zfill(4)+tmp[3].zfill(4)
-		print_cy(self.usk)
+		print dbgcol.cy,self.usk
 
 	def addPixmap(self, pixmappath = None, xpos = 0, ypos = 0, width = 10, height = 10, alphatest = 'on'):
 		if pixmappath is not None:
@@ -1164,7 +1168,7 @@ class ServiceListEditor(Screen):
 			print_gr("finished")
 			self.database[self.usk[:16]]["services"][self.usk] = result
 		else:
-			print_rd("finished")
+			print dbgcol.rd,"finished"
 			del self.database[self.usk[:16]]["services"][self.usk]
 			self.usk = result["usk"]
 			self.cur_service = result
@@ -1180,7 +1184,7 @@ class ServiceListEditor(Screen):
 		self.updateSelection()
 
 	def hideService(self):
-		print_cy("hideService")
+		print dbgcol.cy,"hideService"
 		self.cur_service["flags"]=hex(int(self.cur_service.get("flags","0"),16) ^ dxDontshow)[2:].zfill(4)
 		self.newServiceList[self["list"].l.getCurrentSelectionIndex()] =  self["list"].buildEntry(self.cur_service)
 		self.down()
@@ -1283,19 +1287,23 @@ class ServiceListEditor(Screen):
 		print "openMenu"
 
 	def Exit(self):
-		if self.lamedb.databaseState == 5:
-			self.lamedb.writeLamedb()
-			db = eDVBDB.getInstance()
-			db.removeServices(int("-0x10000",16), -1, -1, 0xFFFFFFFF)
-			db.removeServices(int("-0x11120000",16), -1, -1, 0xFFFFFFFF)
-			for x in self.database:
-				db.removeServices(-1, -1, -1, int(x[:4],16))
-			db.reloadServicelist()
+		self.session.openWithCallback(self.Exit_cb, MessageBox, _("Save servivelist (lamedb)?"), MessageBox.TYPE_YESNO)
+
+	def Exit_cb(self, result):
+		if result:
+			if self.lamedb.databaseState == 5:
+				self.lamedb.writeLamedb()
+				db = eDVBDB.getInstance()
+				db.removeServices(int("-0x10000",16), -1, -1, 0xFFFFFFFF)
+				db.removeServices(int("-0x11120000",16), -1, -1, 0xFFFFFFFF)
+				for x in self.database:
+					db.removeServices(-1, -1, -1, int(x[:4],16))
+				db.reloadServicelist()
 		self.close()
-		
-	def showServiceInfo(self):
-		print "showServiceInfo"
-	
+
+	def showInfo(self):
+		pass
+
 	def showHelp(self):
 		print "showHelp"
 		if self.cur_service is None:
@@ -1353,21 +1361,16 @@ class ServiceListEditor(Screen):
 				)
 		for i in info3:
 			if len(entry)==1:
-				entry.append(MultiContentEntryText(
-					pos = (0,0),
-					size = (i[0], 24),
-					font = 0, flags = RT_HALIGN_CENTER | RT_VALIGN_TOP,
-					text = i[1],
-					border_width = 1,
-					border_color = 0x000C8E90))
+				pos = (0,0)
 			else:
-				entry.append(MultiContentEntryText(
-					pos = (calc_xpos(entry),0),
-					size = (i[0], 24),
-					font = 0, flags = RT_HALIGN_CENTER | RT_VALIGN_TOP,
-					text = i[1],
-					border_width = 1,
-					border_color = 0x000C8E90))
+				pos = (calc_xpos(entry),0)
+			entry.append(MultiContentEntryText(
+				pos = pos,
+				size = (i[0], 24),
+				font = 0, flags = RT_HALIGN_CENTER | RT_VALIGN_TOP,
+				text = i[1],
+				border_width = 1,
+				border_color = 0x000C8E90))
 		l.append(entry)
 #vierte Zeile
 		vpid = "Video\nPID (hex)"
@@ -1396,21 +1399,16 @@ class ServiceListEditor(Screen):
 		entry = [None]
 		for i in info4:
 			if len(entry)==1:
-				entry.append(MultiContentEntryText(
-					pos = (0,0),
-					size = (i[0], 24),
-					font = 0, flags = RT_HALIGN_CENTER | RT_VALIGN_TOP,
-					text = i[1],
-					border_width = 1,
-					border_color = 0x000C8E90))
+				pos = (0,0)
 			else:
-				entry.append(MultiContentEntryText(
-					pos = (calc_xpos(entry),0),
-					size = (i[0], 24),
-					font = 0, flags = RT_HALIGN_CENTER | RT_VALIGN_TOP,
-					text = i[1],
-					border_width = 1,
-					border_color = 0x000C8E90))
+				pos = (calc_xpos(entry),0)
+			entry.append(MultiContentEntryText(
+				pos = pos,
+				size = (i[0], 24),
+				font = 0, flags = RT_HALIGN_CENTER | RT_VALIGN_TOP,
+				text = i[1],
+				border_width = 1,
+				border_color = 0x000C8E90))
 		l.append(entry)
 		
 		self["infolist"].l.setList(l)

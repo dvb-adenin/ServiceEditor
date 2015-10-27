@@ -15,34 +15,22 @@ def _(txt):
 	return t
 
 def print_rd(txt):
-	print "\x1b[31m",
-	print txt,
-	print "\x1b[0m"
+	print "\x1b[31m", txt, "\x1b[0m"
 
 def print_gr(txt):
-	print "\x1b[32m",
-	print txt,
-	print "\x1b[0m"
+	print "\x1b[32m", txt, "\x1b[0m"
 
 def print_ye(txt):
-	print "\x1b[33m",
-	print txt,
-	print "\x1b[0m"
+	print "\x1b[33m", txt, "\x1b[0m"
 
 def print_bl(txt):
-	print "\x1b[34m",
-	print txt,
-	print "\x1b[0m"
+	print "\x1b[34m", txt, "\x1b[0m"
 
 def print_mg(txt):
-	print "\x1b[35m",
-	print txt,
-	print "\x1b[0m"
+	print "\x1b[35m", txt, "\x1b[0m"
 
 def print_cy(txt):
-	print "\x1b[36m",
-	print txt,
-	print "\x1b[0m"
+	print "\x1b[36m", txt, "\x1b[0m"
 
 localeInit()
 language.addCallback(localeInit)

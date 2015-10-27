@@ -1,6 +1,8 @@
 from Tools.Directories import resolveFilename, SCOPE_CONFIG
 from . import *
 import thread
+from Tools.BugHunting import *
+
 class Lamedb:
 	def __init__(self):
 		self.readcnt = 0
@@ -30,7 +32,7 @@ class Lamedb:
 		elif lamedb[0].find("/4/") != -1:
 			self.version = 4
 		else:
-			print_rd ("unknown leame version: ",lamedb[0])
+			print dbgcol.rd,"unknown lamedb version: ",lamedb[0]
 			return
 		print_gr ("import lamedb version %d" % self.version)
 		return lamedb
@@ -77,7 +79,6 @@ class Lamedb:
 					tmp += ",f:" + flags
 				puffer.append(("p:%s%s\n")%(service["provider"],tmp))
 		puffer.append("end\n")
-		puffer.append("Have a lot of girls\n")
 		f = file("/etc/enigma2/lamedb","w")
 		f.writelines(puffer)
 		f.close()
@@ -121,7 +122,7 @@ class Lamedb:
 					if  lamedb[x].find(",") == -1 and lamedb[x].find(":") != -1:
 						tmp = lamedb[x].split(":")
 						if len(tmp) >= 4:
-#							print_cy("ok --> %s" %lamedb[x]) # #adenin_debug
+#							dbgcol.cy,"ok --> %s" %lamedb[x] # #adenin_debug
 							if tmp[1]+tmp[2]+tmp[3] in self.database:
 								tmp = lamedb[x+2].split(",")
 								for key in tmp:
@@ -136,11 +137,13 @@ class Lamedb:
 									services.append((lamedb[x],lamedb[x+1],lamedb[x+2],))
 									skip_processed_lines = 2
 #									self.translateService((lamedb[x],lamedb[x+1],lamedb[x+2],))
+							else:
+								print dbgcol.rd,"transponder not found in database %s:%s:%s"%(tmp[1],tmp[2],tmp[3])
 						else:
-							print_rd("we excepte last four colon separeted parts --> %s" %lamedb[x])
+							print dbgcol.rd,"we excepte last four colon separeted parts --> %s" %lamedb[x]
 							pass
 					else:
-						print_rd ("unknown format (maybe?)--> %s" %lamedb[x])
+						print dbgcol.rd,"unknown format (maybe?)--> %s" %lamedb[x]
 						pass
 				else:
 #					print_ye("Stuff that is not in the service section --> %s" %lamedb[x])
@@ -161,7 +164,7 @@ class Lamedb:
 		service_get = service.get
 		tp_data = serviceData[0].strip().lower().split(":")
 		if len(tp_data) > len(t1):
-			print "falsche Anzahl Parameter (6 erwartet) in ",serviceData[0]
+			print "too many of parameters (6 excepted) ",serviceData[0]
 			return
 		for y in xrange(len(t1)):
 			service_update({t1[y]:tp_data[y]})
@@ -189,11 +192,8 @@ class Lamedb:
 			elif raw[0]=="f":
 				service["flags"] = raw[1].strip().lower()
 			else:
-				print "unbekanter Parameter:",raw[0]
+				print "unknown parameter:",raw[0]
 				print "in:",y
-#			else:
-#				print "hmm, da stimmt was mit den Daten nicht:",raw
-#				break
 		else:
 			uniqueTransponder = service["namespace"]+service["tsid"]+service["onid"]
 			uniqueService = uniqueTransponder + service["sid"]
@@ -272,6 +272,8 @@ class Lamedb:
 			"hierarchy",
 			"inversion",
 			"flags",
+			"system",
+			"plpid",
 			]
 		t2_c = ["frequency",
 			"symbol_rate",
@@ -279,6 +281,7 @@ class Lamedb:
 			"modulation",
 			"fec_inner",
 			"flags",
+			"system",
 			]
 
 		if transponders is None:
@@ -295,7 +298,7 @@ class Lamedb:
 			x[1][0] = freq[1]
 			if freq[0] == "s":
 				if ((self.version == 3) and len(x[1]) > len(t2_sv3)) or ((self.version == 4) and len(x[1]) > len(t2_sv4)):
-					print "zu viele Parameter (t2) in ",x[1]
+					print "error: to many parameters  (t2) in ",x[1]
 					continue
 				for y in xrange(len(x[0])):
 					tp.update({t1[y]:x[0][y]})
@@ -315,7 +318,7 @@ class Lamedb:
 				self.databaseState=1
 			elif freq[0] == "c":
 				if len(x[1]) > len(t2_c):
-					print "zu viele Parameter (t2) in ",x[1]
+					print "error: to many parameters  (t2) in ",x[1]
 					continue
 				for y in xrange(len(x[0])):
 					tp.update({t1[y]:x[0][y]})
@@ -326,7 +329,7 @@ class Lamedb:
 				self.databaseState=1
 			elif freq[0] == "t":
 				if len(x[1]) > len(t2_t):
-					print "zu viele Parameter (t2) in ",x[1]
+					print "error: to many parameters (t2) in ",x[1]
 					continue
 				for y in xrange(len(x[0])):
 					tp.update({t1[y]:x[0][y]})
@@ -338,7 +341,7 @@ class Lamedb:
 		else:
 			self.databaseState=2
 
-dxNoSDT=1    	# don't get SDT
+dxNoSDT=1    		# don't get SDT
 dxDontshow=2
 dxNoDVB=4		# dont use PMT for this service ( use cached pids )
 dxHoldName=8
